@@ -1,19 +1,34 @@
-let gameBoard = {
+let game = {
     board: [
         ['', '', ''],
         ['', '', ''],
         ['', '', '']
     ],
     takenSquares: [],
+    players: [],
+    tie: 0,
+    isActive: false,
+    roundWinner: '',
+    playerChoice: '',
+    computerChoice: '',
+
 };
 const board = document.querySelector('.board');
+const dialog = document.querySelector('.winner');
+const winner = document.querySelector('#winner');
+const score = document.querySelector('#score');
+const dialogBtn = document.querySelector('#dialog');
+
+dialogBtn.addEventListener('click', () => {
+    resetBoard();
+    playGame();
+})
+uiBoard = {
 
 
-dom = {
     renderBoard() {
-
         let buttonId = 1;
-        for (row of gameBoard.board) {
+        for (row of game.board) {
             for (column of row) {
                 const button = document.createElement('button');
                 button.innerText = column;
@@ -21,44 +36,26 @@ dom = {
                 board.appendChild(button);
                 buttonId++;
             }
-
         }
+    },
+
+    playRound() {
         board.addEventListener('click', (event) => {
             game.playerChoice = event.target
             if (game.playerChoice.tagName == 'BUTTON' && game.playerChoice.className != 'taken' && game.isActive == true) {
-                game.playerChoice.textContent = 'O';
-                game.playerChoice.className = 'taken';
-                gameBoard.takenSquares.push(+game.playerChoice.id);
-                computerMove();
-                let cell = getPosition(game.playerChoice.id);
-                console.log(cell);
-                gameBoard.board[cell[0]][cell[1]] = 'O';
-                console.log(game.computerChoice);
-                cell = getPosition(game.computerChoice);
-                console.log(cell);
-                gameBoard.board[cell[0]][cell[1]] = 'X';
+                playerMove()
+                if (game.takenSquares.length < 9) {
+                    computerMove();
+                }
                 winnerCheck();
-
             }
         })
-
     },
-
     updateCell(cell) {
         const square = document.getElementById(cell);
         square.textContent = 'X'
     }
 }
-
-let game = {
-    tie: 0,
-    isActive: false,
-    roundWinner: '',
-    playerChoice: '',
-    computerChoice: '',
-};
-let players = [];
-
 
 function createPlayer(name, marker) {
     this.name = name;
@@ -66,21 +63,13 @@ function createPlayer(name, marker) {
     this.score = 0
 };
 
-player = new createPlayer('player', 'O');
-players.push(player)
-computer = new createPlayer('computer', 'X');
-players.push(computer);
-
-
 function getComputerChoice() {
-    game.computerChoice = Math.floor(Math.random() * (9) + 1);
-    while (gameBoard.takenSquares.includes(game.computerChoice)) {
-        game.computerChoice = Math.floor(Math.random() * (9) + 1);
+    let computerChoice = Math.floor(Math.random() * (9) + 1);
+    while (game.takenSquares.includes(computerChoice)) {
+        computerChoice = Math.floor(Math.random() * (9) + 1);
     }
-    gameBoard.takenSquares.push(game.computerChoice);
-    const button = document.getElementById(game.computerChoice);
-    button.className = 'taken';
-    return game.computerChoice;
+    game.takenSquares.push(computerChoice);
+    return computerChoice;
 
 }
 function getPosition(square) {
@@ -95,7 +84,7 @@ function getPosition(square) {
 
 function rowCheck() {
     let isRow;
-    for (row of gameBoard.board) {
+    for (row of game.board) {
         oMarkerNumber = 0;
         xMarkerNumber = 0;
         for (column of row) {
@@ -121,9 +110,9 @@ function columnCheck() {
         oMarkerNumber = 0;
         xMarkerNumber = 0;
         for (let row = 0; row < 3; row++) {
-            if (gameBoard.board[row][column] == 'O') {
+            if (game.board[row][column] == 'O') {
                 oMarkerNumber++;
-            } else if (gameBoard.board[row][column] == 'X') {
+            } else if (game.board[row][column] == 'X') {
                 xMarkerNumber++;
             }
         }
@@ -143,9 +132,9 @@ function diagonalCheck() {
     let oMarkerNumber = 0;
     let xMarkerNumber = 0;
     for (let i = 0; i < 3; i++) {
-        if (gameBoard.board[i][i] == 'O') {
+        if (game.board[i][i] == 'O') {
             oMarkerNumber++;
-        } else if (gameBoard.board[i][i] == 'X') {
+        } else if (game.board[i][i] == 'X') {
             xMarkerNumber++;
         }
         if (oMarkerNumber == 3) {
@@ -160,9 +149,9 @@ function diagonalCheck() {
     xMarkerNumber = 0;
     for (let row = 2; row = 0; row--) {
         let column = 0;
-        if (gameBoard.board[row][column] == 'O') {
+        if (game.board[row][column] == 'O') {
             oMarkerNumber++;
-        } else if (gameBoard.board[row][column] == 'X') {
+        } else if (game.board[row][column] == 'X') {
             xMarkerNumber++;
         }
         if (oMarkerNumber == 3) {
@@ -193,7 +182,7 @@ function winnerCheck() {
     if (rowCheck() || columnCheck() || diagonalCheck()) {
         game.isActive = false;
         displayRoundResult();
-    } else if (gameBoard.takenSquares.length > 8) {
+    } else if (game.takenSquares.length > 8) {
         game.isActive = false;
         game.tie++
         dialog.setAttribute('open', '');
@@ -203,41 +192,46 @@ function winnerCheck() {
 }
 
 function computerMove() {
-    if (gameBoard.takenSquares.length < 9) {
-        game.computerChoice = getComputerChoice();
-        dom.updateCell(game.computerChoice);
-    }
+    game.computerChoice = getComputerChoice();
+    uiBoard.updateCell(game.computerChoice);
+    const button = document.getElementById(game.computerChoice);
+    button.className = 'taken';
+    let cell = getPosition(game.computerChoice);
+    game.board[cell[0]][cell[1]] = computer.marker;
+
 }
 
-function clearBoard() {
+function playerMove() {
+    game.playerChoice.textContent = player.marker;
+    game.playerChoice.className = 'taken';
+    game.takenSquares.push(+game.playerChoice.id);
+    let cell = getPosition(game.playerChoice.id);
+    game.board[cell[0]][cell[1]] = 'O';
+}
+
+function resetBoard() {
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-            gameBoard.board[i][j] = '';
+            game.board[i][j] = '';
         }
     }
     while (board.lastChild) {
         board.removeChild(board.lastChild)
     }
-    gameBoard.takenSquares = [];
-}
-
-const dialog = document.querySelector('.winner');
-const winner = document.querySelector('#winner');
-const score = document.querySelector('#score');
-const dialogBtn = document.querySelector('#dialog');
-dialogBtn.addEventListener('click', () => {
-    clearBoard();
-    playRound();
-})
-
-function playRound() {
-    dom.renderBoard();
+    game.takenSquares = [];
     game.roundWinner = '';
-    game.isActive = true;
 }
 
 function playGame() {
-    playRound();
+    game.isActive = true;
+    uiBoard.renderBoard();
+    uiBoard.playRound();
 }
+
+player = new createPlayer('player', 'O');
+game.players.push(player)
+computer = new createPlayer('computer', 'X');
+game.players.push(computer);
+
 playGame();
 
