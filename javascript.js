@@ -6,12 +6,12 @@ let gameBoard = {
     ],
     takenSquares: [],
 };
-
-let players = [];
 let game = {
     tie: 0,
     isActive: false,
+    roundWinner: '',
 };
+let players = [];
 
 
 function createPlayer(name, marker) {
@@ -56,10 +56,28 @@ function getPosition(square) {
     return [row, column]
 }
 
-function printBoard() {
-    for (row of gameBoard.board) console.log(row);
+function rowCheck() {
+    let isRow;
+    for (row of gameBoard.board) {
+        oMarkerNumber = 0;
+        xMarkerNumber = 0;
+        for (column of row) {
+            if (column == 'O') {
+                oMarkerNumber++;
+            } else if (column == 'X') {
+                xMarkerNumber++;
+            }
+        }
+        if (oMarkerNumber == 3) {
+            isRow = true;
+            game.roundWinner = player.name;
+        } else if (xMarkerNumber == 3) {
+            isRow = true;
+            game.roundWinner = computer.name;
+        }
+    }
+    return isRow
 }
-
 function columnCheck() {
     let isColumn;
     for (let column = 0; column < 3; column++) {
@@ -72,35 +90,17 @@ function columnCheck() {
                 xMarkerNumber++;
             }
         }
-        if (oMarkerNumber == 3 || xMarkerNumber == 3) {
+        if (oMarkerNumber == 3) {
             isColumn = true;
+            game.roundWinner = player.name;
+        } else if (xMarkerNumber == 3) {
+            isColumn = true;
+            game.roundWinner = computer.name;
         }
 
     }
     return isColumn
 }
-
-function rowCheck() {
-    let isRow;
-    for (row of gameBoard.board) {
-        oMarkerNumber = 0;
-        xMarkerNumber = 0;
-        for (column of row) {
-            if (column == 'O') {
-                oMarkerNumber++;
-            } else if (column == 'X') {
-                xMarkerNumber++;
-            }
-
-        }
-        if (oMarkerNumber == 3 || xMarkerNumber == 3) {
-            isRow = true;
-        }
-
-    }
-    return isRow
-}
-
 function diagonalCheck() {
     let isDiagonal;
     let oMarkerNumber = 0;
@@ -112,8 +112,12 @@ function diagonalCheck() {
         } else if (gameBoard.board[i][i] == 'X') {
             xMarkerNumber++;
         }
-        if (oMarkerNumber == 3 || xMarkerNumber == 3) {
+        if (oMarkerNumber == 3) {
             isDiagonal = true;
+            game.roundWinner = player.name;
+        } else if (xMarkerNumber == 3) {
+            isDiagonal = true;
+            game.roundWinner = computer.name;
         }
     }
     oMarkerNumber = 0;
@@ -125,8 +129,12 @@ function diagonalCheck() {
         } else if (gameBoard.board[row][column] == 'X') {
             xMarkerNumber++;
         }
-        if (oMarkerNumber == 3 || xMarkerNumber == 3) {
+        if (oMarkerNumber == 3) {
             isDiagonal = true;
+            game.roundWinner = player.name;
+        } else if (xMarkerNumber == 3) {
+            isDiagonal = true;
+            game.roundWinner = computer.name;
         }
         column++
     }
@@ -134,10 +142,35 @@ function diagonalCheck() {
 
 }
 
+function displayRoundResult() {
+    if (game.roundWinner == player.name) {
+        player.score++;
+    } else if (game.roundWinner == computer.name) {
+        computer.score++
+    }
+    console.log(`${game.roundWinner} won!`);
+    console.log(`Score: ${player.name}: ${player.score} | ${computer.name}: ${computer.score} | Tie: ${game.tie}`)
+}
+function printBoard() {
+    for (row of gameBoard.board) console.log(row);
+}
+
+function winnerCheck() {
+    if (rowCheck() || columnCheck() || diagonalCheck()) {
+        game.isActive = false;
+        displayRoundResult();
+    } else if (gameBoard.takenSquares.length > 8) {
+        game.isActive = false;
+        game.tie++
+        console.log('Looks like it\'s a tie!');
+        console.log(`Score: ${player.name}: ${player.score} | ${computer.name}: ${computer.score} | Tie: ${game.tie}`)
+    }
+}
+
 function playRound() {
+    game.roundWinner = '';
     game.isActive = true;
     while (game.isActive) {
-
         humanChoice = getHumanChoice();
         if (gameBoard.takenSquares.length < 9) {
             computerChoice = getComputerChoice();
@@ -145,13 +178,8 @@ function playRound() {
         gameBoard.board[humanChoice[0]][humanChoice[1]] = 'O';
         gameBoard.board[computerChoice[0]][computerChoice[1]] = 'X';
         printBoard();
-        if (rowCheck() || columnCheck() || diagonalCheck()) {
-            game.isActive = false;
-        }
 
-        if (gameBoard.takenSquares.length > 8) {
-            game.isActive = false;
-        }
+        winnerCheck();
     }
 }
 
