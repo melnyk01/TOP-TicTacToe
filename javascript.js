@@ -6,6 +6,36 @@ let gameBoard = {
     ],
     takenSquares: [],
 };
+
+
+
+
+
+
+
+uiBoard = {};
+const board = document.querySelector('.board');
+
+for (row of gameBoard.board) {
+    for (column of row) {
+        const button = document.createElement('button');
+        button.innerText = column;
+        board.appendChild(button)
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 let game = {
     tie: 0,
     isActive: false,
@@ -186,5 +216,7 @@ function playRound() {
 function playGame() {
 
     playRound();
+
 }
 playGame();
+
