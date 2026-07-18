@@ -1,12 +1,13 @@
 body {
     height: 100vh;
-    background-color: rgb(0, 97, 0);
+    background-color: black;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
     grid-template-areas: 'header header header'
         '. board .'
         'footer footer footer';
+    gap: 4rem;
 }
 
 .header {
@@ -18,18 +19,40 @@ body {
     display: grid;
     grid-template: repeat(3, 1fr) / repeat(3, 1fr);
     gap: 10px;
-    background-color: black;
+    background-color: white;
 }
 
 .footer {
     grid-area: footer;
+    display: flex;
+    justify-content: center;
 }
 
 button {
-    background-color: rgb(0, 97, 0);
-    height: 172px;
-    font-size: 6rem;
+    background-color: black;
+    height: 10rem;
+    font-size: 7rem;
     line-height: 0;
     border-style: none;
+    color: white;
+}
 
+dialog {
+    align-self: center;
+    text-align: center;
+    width: 30%;
+    background-color: rgb(234, 234, 234);
+}
+
+form button {
+    font-size: 1rem;
+    padding: 1rem;
+    height: 1rem;
+}
+
+button#reset {
+    border: 3px solid white;
+    height: 4.5rem;
+    width: 14rem;
+    font-size: 3rem;
 }

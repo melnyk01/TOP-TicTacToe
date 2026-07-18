@@ -29,6 +29,7 @@ uiBoard = {
     winner: document.querySelector('#winner'),
     score: document.querySelector('#score'),
     dialogBtn: document.querySelector('#dialog'),
+    resetBtn: document.querySelector('#reset'),
 
     renderBoard() {
         let buttonId = 1;
@@ -50,12 +51,20 @@ uiBoard = {
                 winnerCheck();
                 if (game.takenSquares.length < 9 && game.isActive) {
                     computerMove();
+                    winnerCheck();
                 }
-                winnerCheck();
+
             }
         })
         this.dialogBtn.addEventListener('click', () => {
             resetBoard();
+            playGame();
+        })
+        this.resetBtn.addEventListener('click', () => {
+            resetBoard();
+            game.tie = 0;
+            player.score = 0;
+            computer.score = 0;
             playGame();
         })
     },
@@ -63,8 +72,6 @@ uiBoard = {
         const square = document.getElementById(cell);
         square.textContent = computer.marker;
     },
-
-
 
     displayRoundResult(state) {
         this.dialog.setAttribute('open', '');
@@ -170,21 +177,22 @@ function diagonalCheck() {
     }
     oMarkerNumber = 0;
     xMarkerNumber = 0;
+    let column = 0;
     for (let row = 2; row >= 0; row--) {
-        let column = 0;
+
         if (game.board[row][column] == 'O') {
             oMarkerNumber++;
         } else if (game.board[row][column] == 'X') {
             xMarkerNumber++;
         }
-        if (oMarkerNumber == 3) {
-            isDiagonal = true;
-            game.roundWinner = player.name;
-        } else if (xMarkerNumber == 3) {
-            isDiagonal = true;
-            game.roundWinner = computer.name;
-        }
         column++
+    }
+    if (oMarkerNumber == 3) {
+        isDiagonal = true;
+        game.roundWinner = player.name;
+    } else if (xMarkerNumber == 3) {
+        isDiagonal = true;
+        game.roundWinner = computer.name;
     }
     return isDiagonal
 
@@ -231,9 +239,11 @@ function resetBoard() {
     uiBoard.resetBoard();
     game.takenSquares = [];
     game.roundWinner = '';
+
 }
 
 function playGame() {
+
     game.isActive = true;
     uiBoard.renderBoard();
     uiBoard.playRound();
@@ -241,6 +251,5 @@ function playGame() {
 
 player = game.createPlayer('player', 'O');
 computer = game.createPlayer('computer', 'X');
-console.log(game.players);
 playGame();
 
