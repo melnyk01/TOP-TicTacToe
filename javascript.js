@@ -12,19 +12,23 @@ let game = {
     playerChoice: '',
     computerChoice: '',
 
+    createPlayer(name, marker) {
+        const player = {
+            name: name,
+            marker: marker,
+            score: 0,
+        }
+        this.players.push(player);
+        return player
+    },
 };
-const board = document.querySelector('.board');
-const dialog = document.querySelector('.winner');
-const winner = document.querySelector('#winner');
-const score = document.querySelector('#score');
-const dialogBtn = document.querySelector('#dialog');
 
-dialogBtn.addEventListener('click', () => {
-    resetBoard();
-    playGame();
-})
 uiBoard = {
-
+    board: document.querySelector('.board'),
+    dialog: document.querySelector('.winner'),
+    winner: document.querySelector('#winner'),
+    score: document.querySelector('#score'),
+    dialogBtn: document.querySelector('#dialog'),
 
     renderBoard() {
         let buttonId = 1;
@@ -33,35 +37,54 @@ uiBoard = {
                 const button = document.createElement('button');
                 button.innerText = column;
                 button.id = buttonId;
-                board.appendChild(button);
+                this.board.appendChild(button);
                 buttonId++;
             }
         }
     },
-
     playRound() {
-        board.addEventListener('click', (event) => {
+        this.board.addEventListener('click', (event) => {
             game.playerChoice = event.target
             if (game.playerChoice.tagName == 'BUTTON' && game.playerChoice.className != 'taken' && game.isActive == true) {
-                playerMove()
-                if (game.takenSquares.length < 9) {
+                playerMove();
+                winnerCheck();
+                if (game.takenSquares.length < 9 && game.isActive) {
                     computerMove();
                 }
                 winnerCheck();
             }
         })
+        this.dialogBtn.addEventListener('click', () => {
+            resetBoard();
+            playGame();
+        })
     },
     updateCell(cell) {
         const square = document.getElementById(cell);
-        square.textContent = 'X'
+        square.textContent = computer.marker;
+    },
+
+
+
+    displayRoundResult(state) {
+        this.dialog.setAttribute('open', '');
+        this.score.textContent = (`Score: ${player.name}: ${player.score} | ${computer.name}: ${computer.score} | Tie: ${game.tie}`)
+        switch (state) {
+            case 'winner':
+                this.winner.textContent = (`${game.roundWinner} won!`);
+                break;
+            case 'tie':
+                this.winner.textContent = ('Looks like it\'s a tie!');
+                break;
+        }
+    },
+
+    resetBoard() {
+        while (this.board.lastChild) {
+            this.board.removeChild(this.board.lastChild)
+        }
     }
 }
-
-function createPlayer(name, marker) {
-    this.name = name;
-    this.marker = marker;
-    this.score = 0
-};
 
 function getComputerChoice() {
     let computerChoice = Math.floor(Math.random() * (9) + 1);
@@ -84,10 +107,10 @@ function getPosition(square) {
 
 function rowCheck() {
     let isRow;
-    for (row of game.board) {
-        oMarkerNumber = 0;
-        xMarkerNumber = 0;
-        for (column of row) {
+    for (const row of game.board) {
+        let oMarkerNumber = 0;
+        let xMarkerNumber = 0;
+        for (const column of row) {
             if (column == 'O') {
                 oMarkerNumber++;
             } else if (column == 'X') {
@@ -107,8 +130,8 @@ function rowCheck() {
 function columnCheck() {
     let isColumn;
     for (let column = 0; column < 3; column++) {
-        oMarkerNumber = 0;
-        xMarkerNumber = 0;
+        let oMarkerNumber = 0;
+        let xMarkerNumber = 0;
         for (let row = 0; row < 3; row++) {
             if (game.board[row][column] == 'O') {
                 oMarkerNumber++;
@@ -147,7 +170,7 @@ function diagonalCheck() {
     }
     oMarkerNumber = 0;
     xMarkerNumber = 0;
-    for (let row = 2; row = 0; row--) {
+    for (let row = 2; row >= 0; row--) {
         let column = 0;
         if (game.board[row][column] == 'O') {
             oMarkerNumber++;
@@ -167,27 +190,17 @@ function diagonalCheck() {
 
 }
 
-function displayRoundResult() {
-    if (game.roundWinner == player.name) {
-        player.score++;
-    } else if (game.roundWinner == computer.name) {
-        computer.score++
-    }
-    dialog.setAttribute('open', '');
-    winner.textContent = (`${game.roundWinner} won!`);
-    score.textContent = (`Score: ${player.name}: ${player.score} | ${computer.name}: ${computer.score} | Tie: ${game.tie}`);
-}
-
 function winnerCheck() {
     if (rowCheck() || columnCheck() || diagonalCheck()) {
         game.isActive = false;
-        displayRoundResult();
+        if (game.roundWinner == player.name) {
+            player.score++;
+        } else if (game.roundWinner == computer.name) computer.score++
+        uiBoard.displayRoundResult('winner');
     } else if (game.takenSquares.length > 8) {
         game.isActive = false;
         game.tie++
-        dialog.setAttribute('open', '');
-        winner.textContent = ('Looks like it\'s a tie!');
-        score.textContent = (`Score: ${player.name}: ${player.score} | ${computer.name}: ${computer.score} | Tie: ${game.tie}`)
+        uiBoard.displayRoundResult('tie');
     }
 }
 
@@ -215,9 +228,7 @@ function resetBoard() {
             game.board[i][j] = '';
         }
     }
-    while (board.lastChild) {
-        board.removeChild(board.lastChild)
-    }
+    uiBoard.resetBoard();
     game.takenSquares = [];
     game.roundWinner = '';
 }
@@ -228,10 +239,8 @@ function playGame() {
     uiBoard.playRound();
 }
 
-player = new createPlayer('player', 'O');
-game.players.push(player)
-computer = new createPlayer('computer', 'X');
-game.players.push(computer);
-
+player = game.createPlayer('player', 'O');
+computer = game.createPlayer('computer', 'X');
+console.log(game.players);
 playGame();
 
